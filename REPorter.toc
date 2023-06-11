@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Title: REPorter
 ## Notes: Provide battleground map.
-## Version: 0.7.1.1b
+## Version: 0.07
 ## Author: AcidWeb
 ## SavedVariablesPerCharacter: REPSettings
 ## X-3.3.5-Version-Author: Nobrainx.

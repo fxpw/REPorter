@@ -1,0 +1,13 @@
+{
+    "Lua.diagnostics.globals": [
+        "MAX_RAID_MEMBERS",
+        "CloseDropDownMenus",
+        "EasyMenu",
+        "InterfaceOptions_AddCategory",
+        "SlashCmdList",
+        "FACTION_HORDE",
+        "FACTION_ALLIANCE",
+        "WorldMapFrame",
+        "HEALTH"
+    ]
+}
