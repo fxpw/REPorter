@@ -1,0 +1,19 @@
+## Interface: 30300
+## Title: REPorter
+## Notes: Provide battleground map.
+## Version: 0.7.1.1b
+## Author: AcidWeb
+## SavedVariablesPerCharacter: REPSettings
+## X-3.3.5-Version-Author: Nobrainx.
+
+Locals\enUS.lua
+Locals\koKR.lua
+Locals\ruRU.lua
+Locals\zhCN.lua
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibShefkiTimer-1.0\LibShefkiTimer-1.0.lua
+Libs\LibDebug-1.0\LibDebug-1.0.lua
+
+REPorter.xml
