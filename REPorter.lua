@@ -1,5 +1,5 @@
 local Debug = LibStub("LibDebug-1.0")
--- Debug:EnableDebugging()
+Debug:EnableDebugging()
 
 REPorterNamespace = {};
 local RE = REPorterNamespace;
@@ -39,7 +39,7 @@ RE.ReportPrefix = "";
 
 RE.FoundNewVersion = false;
 RE.AddonVersionCheck = 71;
-RE.Debug = true;
+RE.Debug = false;
 
 RE.DefaultConfig = {
 	firstTime  = 1,
@@ -73,6 +73,7 @@ RE.ClassColors = {
 	["DEATHKNIGHT"] = "C41E3A",
 };
 RE.MapSettings = {
+	-- HE -- Height; WI - WIDTH;  HO - HorizontalOffset ; VE - VerticalOffset
 	["ArathiBasin"]          = {["HE"] = 400, ["HO"] = 180, ["VE"] = 25, ["pointsToWin"] = 1600, ["WorldStateNum"] = 1, ["StartTimer"] = 240},
 	["WarsongGulch"]         = {["HE"] = 490, ["HO"] = 185, ["VE"] = 10, ["StartTimer"]  = 240},
 	["AlteracValley"]        = {["HE"] = 465, ["HO"] = 180, ["VE"] = 30, ["StartTimer"]  = 240},
@@ -355,7 +356,6 @@ function REPorter_OnEvent(self, event, ...)
 			REPSettings["scale"] = RE.DefaultConfig["scale"];
 			REPSettings["version"] = 70;
 		end
-		--
 		SLASH_REPORTER1 = "/rep";
 		SlashCmdList["REPORTER"] = function(arg)
 			local text, id = arg:match("(%w+)%s?(%d*)")
@@ -416,7 +416,9 @@ function REPorter_OnEvent(self, event, ...)
 				local Message = {strsplit("/", text)};
 				if Message[1] then
 					Message = {strsplit(" ", Message[1])};
-					AlliancePointsNeeded = RE.MapSettings["templeofkotmogu"]["pointsToWin"] - tonumber(Message[3]);
+					if Message[2] ~= nil then
+						AlliancePointsNeeded = RE.MapSettings["templeofkotmogu"]["pointsToWin"] - tonumber(Message[3]);
+					end
 				end
 			end
 			local _, _, _, text = GetWorldStateUIInfo(RE.MapSettings["templeofkotmogu"]["WorldStateNum"]+1);
@@ -424,7 +426,9 @@ function REPorter_OnEvent(self, event, ...)
 				local Message = {strsplit("/", text)};
 				if Message[1] then
 					Message = {strsplit(" ", Message[1])};
-					HordePointsNeeded = RE.MapSettings["templeofkotmogu"]["pointsToWin"] - tonumber(Message[3]);
+					if Message[2] ~= nil then
+						HordePointsNeeded = RE.MapSettings["templeofkotmogu"]["pointsToWin"] - tonumber(Message[3]);
+					end
 				end
 			end
 			if AlliancePointsNeeded and HordePointsNeeded then
@@ -480,9 +484,12 @@ function REPorter_OnEvent(self, event, ...)
 			if text ~= nil then
 				local Message = {strsplit("/", text)};
 				if Message[1] then
-					Message = {strsplit(" ", Message[1])};
-					HordePointsNeeded = RE.MapSettings["STVDiamondMineBG"]["pointsToWin"] - tonumber(Message[2]);
-				end
+					Debug(Message[1])
+						Message = {strsplit(" ", Message[1])};
+						if Message[2] ~= nil then
+							HordePointsNeeded = RE.MapSettings["STVDiamondMineBG"]["pointsToWin"] - tonumber(Message[2]);
+						end
+					end
 			end
 			if AlliancePointsNeeded and HordePointsNeeded then
 				AllianceCartsNeeded = REPorter_Round(AlliancePointsNeeded / RE.EstimatorSettings["STVDiamondMineBG"], 1);
@@ -611,6 +618,7 @@ end
 function __GetPlayerMapRealCords(arg1, arg2, arg3)
 	local posX, posY = GetPlayerMapPosition("player")
 	local rPosX, rPosY =  REPorter_GetRealCoords(posX, posY);
+	-- Debug("\nMAP: |cFF74D06C[%.3f, %.3f]|r, \nREAL: |cFF74D06C[%.3f, %.3f]|r\n\n", posX, posY, rPosX, rPosY)
 end
 
 function REPorter_OnUpdate(self, elapsed)
@@ -662,47 +670,48 @@ function REPorter_OnUpdate(self, elapsed)
 			end
 		end
 		
-		RE.numVehicles = GetNumBattlefieldVehicles();
-		local totalVehicles = #RE.BGVehicles;
-		local index = 0;
-		for i=1, RE.numVehicles do
-			if i > totalVehicles then
-				local vehicleName = "REPorter"..i;
-				RE.BGVehicles[i] = CreateFrame("FRAME", vehicleName, REPorterOverlay, "REPorterVehicleTemplate");
-				RE.BGVehicles[i].texture = _G[vehicleName.."Texture"];
-			end
-			if RE.CurrentMap == "IsleofConquest" then
-				RE.BGVehicles[i]:EnableMouse(true);
-				RE.BGVehicles[i]:SetScript("OnEnter", REPorterUnit_OnEnterVehicle);
-				RE.BGVehicles[i]:SetScript("OnLeave", REPorter_HideTooltip);
-			else
-				RE.BGVehicles[i]:EnableMouse(false);
-				RE.BGVehicles[i]:SetScript("OnEnter", nil);
-				RE.BGVehicles[i]:SetScript("OnLeave", nil);
-			end
-			local vehicleX, vehicleY, unitName, isPossessed, vehicleType, orientation, isPlayer = GetBattlefieldVehicleInfo(i);
-
-			if vehicleX and not isPlayer and vehicleType ~= "Idle" then
-				vehicleX, vehicleY = REPorter_GetRealCoords(vehicleX, vehicleY);
-				if RE.CurrentMap == "STVDiamondMineBG" then
-					RE.BGVehicles[i].texture:SetTexture(WorldMap_GetVehicleTexture(vehicleType, isPossessed));
-				else
-					RE.BGVehicles[i].texture:SetTexture(WorldMap_GetVehicleTexture(vehicleType, isPossessed));
+		if RE.CurrentMap ~= "templeofkotmogu" then
+			RE.numVehicles = GetNumBattlefieldVehicles();
+			local totalVehicles = #RE.BGVehicles;
+			local index = 0;
+			for i=1, RE.numVehicles do
+				if i > totalVehicles then
+					local vehicleName = "REPorter"..i;
+					RE.BGVehicles[i] = CreateFrame("FRAME", vehicleName, REPorterOverlay, "REPorterVehicleTemplate");
+					RE.BGVehicles[i].texture = _G[vehicleName.."Texture"];
 				end
-				RE.BGVehicles[i].texture:SetRotation(orientation);
-				RE.BGVehicles[i].name = unitName;
-				RE.BGVehicles[i]:SetPoint("CENTER", "REPorterOverlay", "TOPLEFT", vehicleX, vehicleY);
-				RE.BGVehicles[i]:Show();
-				index = i;
-			else
-				RE.BGVehicles[i]:Hide();
+				if RE.CurrentMap == "IsleofConquest" then
+					RE.BGVehicles[i]:EnableMouse(true);
+					RE.BGVehicles[i]:SetScript("OnEnter", REPorterUnit_OnEnterVehicle);
+					RE.BGVehicles[i]:SetScript("OnLeave", REPorter_HideTooltip);
+				else
+					RE.BGVehicles[i]:EnableMouse(false);
+					RE.BGVehicles[i]:SetScript("OnEnter", nil);
+					RE.BGVehicles[i]:SetScript("OnLeave", nil);
+				end
+				local vehicleX, vehicleY, unitName, isPossessed, vehicleType, orientation, isPlayer = GetBattlefieldVehicleInfo(i);
+				if vehicleX and not isPlayer and vehicleType ~= "Idle" then
+					vehicleX, vehicleY = REPorter_GetRealCoords(vehicleX, vehicleY);
+					RE.BGVehicles[i].texture:SetTexture(WorldMap_GetVehicleTexture(vehicleType, isPossessed));
+					RE.BGVehicles[i].texture:SetRotation(orientation);
+					if RE.CurrentMap == "STVDiamondMineBG" then
+						RE.BGVehicles[i].texture:SetWidth(RE.POIIconSize);
+						RE.BGVehicles[i].texture:SetHeight(RE.POIIconSize);
+					end
+					RE.BGVehicles[i].name = unitName;
+					RE.BGVehicles[i]:SetPoint("CENTER", "REPorterOverlay", "TOPLEFT", vehicleX, vehicleY);
+					RE.BGVehicles[i]:Show();
+					index = i;
+				else
+					RE.BGVehicles[i]:Hide();
+				end
+			end
+			if index < totalVehicles then
+				for i=index+1, totalVehicles do
+					RE.BGVehicles[i]:Hide();
+				end
 			end
 		end
-		if index < totalVehicles then
-			for i=index+1, totalVehicles do
-				RE.BGVehicles[i]:Hide();
-			end
-		end	
 
 		for i=1, RE.BGPOISNum do
 			local battlefieldPOIName = "REPorterPOI"..i;
